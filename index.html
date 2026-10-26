@@ -150,6 +150,60 @@
   }
   .pill.live{color:var(--accent);border-color:rgba(61,220,151,.4);background:rgba(61,220,151,.08)}
   .controls{display:flex;gap:10px;align-items:center;justify-content:center;padding:16px 0 4px;flex-wrap:wrap}
+  .head-tools{display:flex;align-items:center;gap:12px}
+  .fs-toggle{
+    display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.4px;
+    text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none;
+  }
+  .fs-toggle:hover{color:var(--text)}
+  .fs-toggle .switch{width:36px;height:20px;margin:0}
+  .fs-toggle .switch .track::after{top:2px;left:2px;width:14px;height:14px}
+  .fs-toggle .switch input:checked + .track::after{transform:translateX(16px)}
+
+  /* ---------- fullscreen scan ---------- */
+  .scan-full{position:fixed;inset:0;z-index:70;background:#000;height:100dvh;overflow:hidden}
+  #fsVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+  #fsVideo.mirror{transform:scaleX(-1)}
+  .fs-scrim{position:absolute;left:0;right:0;height:190px;z-index:1;pointer-events:none}
+  .fs-scrim.top{top:0;background:linear-gradient(rgba(0,0,0,.86),transparent)}
+  .fs-scrim.bottom{bottom:0;background:linear-gradient(transparent,rgba(0,0,0,.88))}
+  .fs-guide{position:absolute;inset:16% 5% 19%;z-index:2;pointer-events:none}
+  .fs-guide span{
+    position:absolute;width:34px;height:34px;border:2.5px solid rgba(61,220,151,.9);
+    filter:drop-shadow(0 0 9px rgba(61,220,151,.55));
+  }
+  .fs-guide .tl{top:0;left:0;border-right:0;border-bottom:0;border-radius:10px 0 0 0}
+  .fs-guide .tr{top:0;right:0;border-left:0;border-bottom:0;border-radius:0 10px 0 0}
+  .fs-guide .bl{bottom:0;left:0;border-right:0;border-top:0;border-radius:0 0 0 10px}
+  .fs-guide .br{bottom:0;right:0;border-left:0;border-top:0;border-radius:0 0 10px 0}
+  .fs-scanline{
+    position:absolute;left:3%;right:3%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(61,220,151,.6),transparent);
+    animation:sweep 3.6s ease-in-out infinite;
+  }
+  .fs-top{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 18px 14px}
+  .fs-live{
+    display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:1.4px;
+    color:var(--accent);background:rgba(4,18,14,.6);border:1px solid rgba(61,220,151,.35);
+    padding:7px 12px;border-radius:999px;backdrop-filter:blur(10px);
+  }
+  .fs-top-right{display:flex;align-items:center;gap:10px}
+  .fs-top .pill{
+    background:rgba(10,13,18,.65);backdrop-filter:blur(10px);border-color:rgba(255,255,255,.16);
+    color:var(--text);text-transform:none;letter-spacing:0;font-size:11.5px;padding:6px 11px;
+  }
+  .fs-top .tool{width:34px;height:34px;background:rgba(10,13,18,.7);backdrop-filter:blur(10px);border-color:rgba(255,255,255,.16)}
+  .fs-chips{position:absolute;top:calc(62px + env(safe-area-inset-top));left:0;right:0;z-index:3;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:0 16px}
+  .fs-chips .chip{background:rgba(10,13,18,.68);backdrop-filter:blur(10px);border-color:rgba(255,255,255,.16)}
+  .fs-chips .chip.active{background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent;color:#04120e}
+  .fs-bottom{
+    position:absolute;bottom:0;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:center;
+    gap:26px;padding:22px 18px calc(22px + env(safe-area-inset-bottom));
+  }
+  .fs-bottom .btn.ghost{background:rgba(10,13,18,.66);border-color:rgba(255,255,255,.18);backdrop-filter:blur(10px)}
+  .fs-bottom .btn.capture{width:78px;height:78px}
+  .fs-hint{position:absolute;bottom:calc(114px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;font-size:11.5px;color:rgba(233,238,247,.72);z-index:3;pointer-events:none}
+  @media (max-width:420px){.fs-bottom{gap:16px}}
 
   /* ---------- pages ---------- */
   .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
@@ -356,7 +410,16 @@
       <div class="card">
         <div class="card-head">
           <h2>Camera</h2>
-          <span class="pill" id="camState">Idle</span>
+          <div class="head-tools">
+            <span class="pill" id="camState">Idle</span>
+            <label class="fs-toggle" title="Open the fullscreen scan view">
+              <span>Full screen</span>
+              <span class="switch">
+                <input type="checkbox" id="fsToggle">
+                <span class="track"></span>
+              </span>
+            </label>
+          </div>
         </div>
 
         <div class="stage" id="stage">
@@ -385,7 +448,8 @@
 
         <p class="hint">
           Tip: use even lighting and keep the page flat. Pick a filter below — <strong>Magic</strong> turns a photo into a clean,
-          high-contrast document instantly. If the browser blocks the camera (common when opening the file directly),
+          high-contrast document instantly. Flip <strong>Full screen</strong> on to scan from an edge-to-edge camera view, then
+          <kbd>Space</kbd> or the shutter to capture. If the camera is blocked (common when opening the file directly),
           use <strong>Import</strong> instead — every other feature still works.
         </p>
       </div>
@@ -507,6 +571,44 @@
   Built for quick document capture — camera, filters, PDF building and file conversion all run client-side.
   The PDF engine, PDF reader and ZIP packer load from a CDN, so the first load needs a connection.
 </footer>
+
+<!-- ================= FULLSCREEN SCAN ================= -->
+<div class="scan-full" id="scanFull" hidden>
+  <video id="fsVideo" playsinline autoplay muted></video>
+  <div class="fs-scrim top"></div>
+  <div class="fs-scrim bottom"></div>
+
+  <div class="fs-guide" aria-hidden="true">
+    <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+    <i class="fs-scanline"></i>
+  </div>
+
+  <div class="fs-top">
+    <div class="fs-live"><span class="dot"></span>Live scan</div>
+    <div class="fs-top-right">
+      <span class="pill" id="fsCount">0 pages</span>
+      <button class="tool" id="fsClose" aria-label="Exit fullscreen scan">✕</button>
+    </div>
+  </div>
+
+  <div class="chips fs-chips" id="fsChips" role="group" aria-label="Filter">
+    <button class="chip" data-filter="original">Original</button>
+    <button class="chip" data-filter="gray">Grayscale</button>
+    <button class="chip active" data-filter="scan">Magic</button>
+    <button class="chip" data-filter="bw">B&amp;W</button>
+    <button class="chip" data-filter="light">Bright</button>
+  </div>
+
+  <p class="fs-hint">Fit the page inside the frame · Space or the shutter to capture</p>
+
+  <div class="fs-bottom">
+    <button class="btn ghost" id="fsFlip" title="Switch camera">Flip</button>
+    <button class="btn capture" id="fsCapture" aria-label="Capture page" title="Capture page"></button>
+    <button class="btn ghost" id="fsImport" title="Import images">Import</button>
+  </div>
+
+  <div class="flash" id="fsFlash"></div>
+</div>
 
 <!-- ================= EDITOR MODAL ================= -->
 <div class="modal" id="editor" hidden>
@@ -952,43 +1054,129 @@
     camState.classList.remove("live");
   }
 
+  function grabFrame(videoEl, targetAR, mirror) {
+    const vw = videoEl.videoWidth, vh = videoEl.videoHeight;
+    let sw = vw, sh = vh, sx = 0, sy = 0;
+    if (vw / vh > targetAR) { sw = Math.round(vh * targetAR); sx = Math.round((vw - sw) / 2); }
+    else { sh = Math.round(vw / targetAR); sy = Math.round((vh - sh) / 2); }
+
+    const max = 1900;
+    const scale = Math.min(1, max / Math.max(sw, sh));
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(sw * scale));
+    c.height = Math.max(1, Math.round(sh * scale));
+    const ctx = c.getContext("2d");
+    if (mirror) { ctx.translate(c.width, 0); ctx.scale(-1, 1); }
+    ctx.drawImage(videoEl, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  function flashEl(el) {
+    el.classList.remove("on");
+    void el.offsetWidth;
+    el.classList.add("on");
+  }
+
   function capture() {
     if (!cameraStream || !video.videoWidth) {
       toast("Start the camera first, or import an image.", "error");
       return;
     }
-    const vw = video.videoWidth, vh = video.videoHeight;
-
     // Crop the video frame to the preview's 4:3 aspect so what you see is what you get.
-    const ar = 4 / 3;
-    let sw = vw, sh = vh, sx = 0, sy = 0;
-    if (vw / vh > ar) { sw = Math.round(vh * ar); sx = Math.round((vw - sw) / 2); }
-    else { sh = Math.round(vw / ar); sy = Math.round((vh - sh) / 2); }
-
-    const max = 1900;
-    const scale = Math.min(1, max / Math.max(sw, sh));
-    const c = document.createElement("canvas");
-    c.width = Math.round(sw * scale);
-    c.height = Math.round(sh * scale);
-    const ctx = c.getContext("2d");
-    if (facing === "user") { ctx.translate(c.width, 0); ctx.scale(-1, 1); }
-    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
-
-    addPage(c);
-
-    const flash = $("#flash");
-    flash.classList.remove("on");
-    void flash.offsetWidth;
-    flash.classList.add("on");
+    addPage(grabFrame(video, 4 / 3, facing === "user"));
+    flashEl($("#flash"));
     toast("Page " + scanPages.length + " captured", "ok");
+  }
+
+  /* ---------- fullscreen scan ---------- */
+  const fsVideo = $("#fsVideo");
+  const scanFull = $("#scanFull");
+
+  async function openFullScan() {
+    scanFull.hidden = false;
+    document.body.style.overflow = "hidden";
+
+    if (!cameraStream) await startCamera();
+    if (scanFull.hidden) return;               // toggled off while starting
+    if (!cameraStream) { closeFullScan(); return; }
+
+    fsVideo.srcObject = cameraStream;
+    fsVideo.classList.toggle("mirror", facing === "user");
+    try { await fsVideo.play(); } catch (e) {}
+    try { video.pause(); } catch (e) {}
+
+    updateFsCount();
+    const req = scanFull.requestFullscreen || scanFull.webkitRequestFullscreen;
+    if (req && !document.fullscreenElement) {
+      try {
+        const p = req.call(scanFull);
+        if (p && p.catch) p.catch(() => {});
+      } catch (e) {}
+    }
+  }
+
+  function closeFullScan() {
+    $("#fsToggle").checked = false;
+    if (scanFull.hidden) return;
+    scanFull.hidden = true;
+    document.body.style.overflow = "";
+    fsVideo.srcObject = null;
+    if (document.fullscreenElement) {
+      const p = document.exitFullscreen();
+      if (p && p.catch) p.catch(() => {});
+    } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+    if (cameraStream) video.play().catch(() => {});
+  }
+
+  function captureFull() {
+    if (!cameraStream || !fsVideo.videoWidth) {
+      toast("Camera is not ready yet.", "error");
+      return;
+    }
+    const ar = window.innerWidth / Math.max(1, window.innerHeight) || 0.75;
+    addPage(grabFrame(fsVideo, ar, facing === "user"));
+    flashEl($("#fsFlash"));
+  }
+
+  function updateFsCount() {
+    const n = scanPages.length;
+    $("#fsCount").textContent = n + (n === 1 ? " page" : " pages");
+  }
+
+  async function switchCamera() {
+    facing = facing === "environment" ? "user" : "environment";
+    if (!cameraStream) return;
+    await startCamera();
+    if (!cameraStream) return;
+    video.classList.toggle("mirror", facing === "user");
+    if (!scanFull.hidden) {
+      fsVideo.srcObject = cameraStream;
+      fsVideo.classList.toggle("mirror", facing === "user");
+      fsVideo.play().catch(() => {});
+      try { video.pause(); } catch (e) {}
+    }
   }
 
   $("#btnStart").addEventListener("click", startCamera);
   $("#btnStop").addEventListener("click", () => { stopCamera(); toast("Camera stopped"); });
   $("#btnCapture").addEventListener("click", capture);
-  $("#btnSwitch").addEventListener("click", async () => {
-    facing = facing === "environment" ? "user" : "environment";
-    if (cameraStream) await startCamera();
+  $("#btnSwitch").addEventListener("click", switchCamera);
+
+  $("#fsToggle").addEventListener("change", (e) => {
+    if (e.target.checked) openFullScan();
+    else closeFullScan();
+  });
+  $("#fsClose").addEventListener("click", closeFullScan);
+  $("#fsCapture").addEventListener("click", captureFull);
+  $("#fsFlip").addEventListener("click", switchCamera);
+  $("#fsImport").addEventListener("click", () => $("#scanUpload").click());
+
+  ["fullscreenchange", "webkitfullscreenchange"].forEach((ev) => {
+    document.addEventListener(ev, () => {
+      if (!scanFull.hidden && !document.fullscreenElement && !document.webkitFullscreenElement) closeFullScan();
+    });
   });
 
   /* ================================================================
@@ -1030,6 +1218,7 @@
         '</div>';
       wrap.appendChild(el);
     });
+    updateFsCount();
   }
 
   $("#thumbs").addEventListener("click", (e) => {
@@ -1057,15 +1246,25 @@
     }
   });
 
+  function setScanFilter(filter) {
+    currentFilter = filter;
+    $$("#filterRow .chip, #fsChips .chip").forEach((c) => c.classList.toggle("active", c.dataset.filter === filter));
+    if (scanPages.length) {
+      scanPages.forEach((p) => { p.filter = filter; });
+      renderThumbs();
+    }
+  }
+
   $("#filterRow").addEventListener("click", (e) => {
     const chip = e.target.closest(".chip");
     if (!chip) return;
-    currentFilter = chip.dataset.filter;
-    $$("#filterRow .chip").forEach((c) => c.classList.toggle("active", c === chip));
-    if (scanPages.length) {
-      scanPages.forEach((p) => { p.filter = currentFilter; });
-      renderThumbs();
-    }
+    setScanFilter(chip.dataset.filter);
+  });
+
+  $("#fsChips").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    setScanFilter(chip.dataset.filter);
   });
 
   $("#btnClearPages").addEventListener("click", () => {
@@ -1331,14 +1530,18 @@
   $("#editor").addEventListener("click", (e) => { if (e.target === $("#editor")) closeEditor(); });
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
+      if (!$("#scanFull").hidden) closeFullScan();
       if (!$("#preview").hidden) closePreview();
       if (!$("#cropper").hidden) closeCropper();
       if (!$("#editor").hidden) closeEditor();
     }
     const typing = e.target.closest && e.target.closest("input, select, textarea, button, a, [contenteditable]");
-    if (e.key === " " && !typing && $("#view-scan").classList.contains("active") && $("#editor").hidden && $("#cropper").hidden && $("#preview").hidden) {
-      e.preventDefault();
-      capture();
+    if (e.key === " " && !typing) {
+      if (!$("#scanFull").hidden) { e.preventDefault(); captureFull(); return; }
+      if ($("#view-scan").classList.contains("active") && $("#editor").hidden && $("#cropper").hidden && $("#preview").hidden) {
+        e.preventDefault();
+        capture();
+      }
     }
   });
 
